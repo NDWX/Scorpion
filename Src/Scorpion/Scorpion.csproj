@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{35193146-7DB5-4CED-9247-6DD2C9048EAB}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Scorpion</RootNamespace>
+    <AssemblyName>Scorpion</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Pug.Application.Data">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Application.Data.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Application.Security">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Application.Security.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Bizcotty.Common">
+      <HintPath>..\..\..\Libraries\Bizcotty\Common\0.9\Debug\Pug.Bizcotty.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Cartage">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Cartage.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Core">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Sisca">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Sisca.dll</HintPath>
+    </Reference>
+    <Reference Include="Sisca.Common">
+      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Sisca.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Scorpion.cs" />
+    <Compile Include="Order.cs" />
+    <Compile Include="OrderFulfillmentProcess.cs" />
+    <Compile Include="Payment.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <PropertyGroup>
+    <PostBuildEvent>copy /y "$(TargetDir)*.*" "$(ProjectDir)..\..\Output\$(ConfigurationName)\"</PostBuildEvent>
+  </PropertyGroup>
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
