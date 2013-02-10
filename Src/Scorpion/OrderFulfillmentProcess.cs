@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 namespace Pug.Scorpion
 {
 	[DataContract]
-	public class OrderFulfillmentProcess
+	public class OrderFulfillmentProcess : Entity
 	{
 		[DataContract]
 		public class _Info
@@ -168,7 +168,8 @@ namespace Pug.Scorpion
 		_Info info;
 		IEnumerable<_Progress._Info> progress;
 
-		public OrderFulfillmentProcess(_Info info)
+		public OrderFulfillmentProcess(_Info info, IScorpionDataProviderFactory dataProviderFactory)
+			: base(dataProviderFactory)
 		{
 			this.info = info;
 		}

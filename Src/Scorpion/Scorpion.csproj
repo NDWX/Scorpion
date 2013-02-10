@@ -31,36 +31,53 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Pug.Application.Data">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Application.Data.dll</HintPath>
+    <Reference Include="Pug.Application.Data, Version=2.0.4587.31868, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Application.Security">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Application.Security.dll</HintPath>
+    <Reference Include="Pug.Application.Data.common">
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Data.common.dll</HintPath>
+    </Reference>
+    <Reference Include="Pug.Application.Security, Version=1.0.4587.31869, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Security.dll</HintPath>
     </Reference>
     <Reference Include="Pug.Bizcotty.Common">
       <HintPath>..\..\..\Libraries\Bizcotty\Common\0.9\Debug\Pug.Bizcotty.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Cartage">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Cartage.dll</HintPath>
+    <Reference Include="Pug.Cartage, Version=1.0.0.21401, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Cartage.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Core">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Core.dll</HintPath>
+    <Reference Include="Pug.Core, Version=1.0.4621.17543, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Sisca">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Pug.Sisca.dll</HintPath>
+    <Reference Include="Pug.Sisca, Version=1.0.1.21553, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Sisca.dll</HintPath>
     </Reference>
-    <Reference Include="Sisca.Common">
-      <HintPath>..\..\Libraries\Sisca\1.0\Debug\Sisca.Common.dll</HintPath>
+    <Reference Include="Sisca.Common, Version=1.0.4789.21552, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Sisca.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Transactions" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CartFinalized.cs" />
+    <Compile Include="ContactMethod.cs" />
+    <Compile Include="Entity.cs" />
+    <Compile Include="ICartInfoStoreProvider.cs" />
+    <Compile Include="ICartIntoStoreProviderFactory.cs" />
+    <Compile Include="IScorpionDataProvider.cs" />
+    <Compile Include="IScorpionDataProviderFactory.cs" />
+    <Compile Include="OrderExists.cs" />
+    <Compile Include="OrderNotFound.cs" />
     <Compile Include="Scorpion.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderFulfillmentProcess.cs" />

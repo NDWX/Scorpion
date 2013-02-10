@@ -6,11 +6,12 @@ using System.Runtime.Serialization;
 namespace Pug.Scorpion
 {
 	[DataContract]
-	public class Payment
+	public class Payment : Entity
 	{
 		_Info info;
-		
-		public Payment(_Info info)
+
+		public Payment(_Info info, IScorpionDataProviderFactory dataProviderFactory)
+			: base(dataProviderFactory)
 		{
 			this.info = info;
 		}
@@ -42,7 +43,7 @@ namespace Pug.Scorpion
 		[DataContract]
 		public class _Info
 		{
-			string order;
+			string identifier, order;
 			DateTime timestamp;
 			string method;
 			string status, statusShortMessage, statusLongMessage;
@@ -50,8 +51,9 @@ namespace Pug.Scorpion
 			decimal amount, fee, finalAmount, taxAmount, exchangeRate;
 			string receiptIdentifier;
 
-			public _Info(string order, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
+			public _Info(string identifier, string order, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
 			{
+				this.identifier = identifier;
 				this.order = order;
 				this.timestamp = timestamp;
 				this.method = method;
@@ -68,6 +70,18 @@ namespace Pug.Scorpion
 				this.taxAmount = taxAmount;
 				this.exchangeRate = exchangeRate;
 				this.receiptIdentifier = receiptIdentifier;
+			}
+
+			public string Identifier
+			{
+				get
+				{
+					return identifier;
+				}
+				protected set
+				{
+					identifier = value;
+				}
 			}
 
 			[DataMember]

@@ -9,38 +9,8 @@ using Pug.Bizcotty.Geography;
 
 namespace Pug.Scorpion
 {
-	public class ContactMethod
-	{
-		string purpose, type, destination;
-
-		public ContactMethod(string purpose, string type, string destination)
-		{
-			this.purpose = purpose;
-			this.type = type;
-			this.destination = destination;
-		}
-
-		public string Purpose
-		{
-			get { return purpose; }
-			protected set { purpose = value; }
-		}
-
-		public string Type
-		{
-			get { return type; }
-			protected set { type = value; }
-		}
-
-		public string Destination
-		{
-			get { return destination; }
-			protected set { destination = value; }
-		}
-	}
-
 	[DataContract]
-	public class Order
+	public class Order : Entity
 	{
 		[DataContract]
 		public class _Info
@@ -290,12 +260,39 @@ namespace Pug.Scorpion
 		//}
 
 		_Info info;
-		IEnumerable<OrderFulfillmentProcess._Info> fulfillmentProcesses;
+		//IEnumerable<OrderFulfillmentProcess._Info> fulfillmentProcesses;
 
+		SynchronizationContext synchronizationContext;
 
-		public Order(_Info info)
+		public Order(_Info info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext)
+			: base(dataProviderFactory)
 		{
 			this.info = info;
+			this.synchronizationContext = synchronizationContext;
+		}
+
+		string GetNewIdentifier(object sync)
+		{
+			byte[] binarySeed;
+
+			lock (sync)
+			{
+				binarySeed = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
+			}
+
+			string newIdentifier = Pug.Base32.From(binarySeed).Replace("=", "");
+
+			return newIdentifier;
+		}
+
+		string GetNewPaymentIdentifier()
+		{
+			return GetNewIdentifier(synchronizationContext.PaymentIdentifierSync);
+		}
+
+		string GetNewFulfillmentProcessIdentifier()
+		{
+			return GetNewIdentifier(synchronizationContext.FulfillmentProcessIdentifierSync);
 		}
 
 		[DataMember]
@@ -318,9 +315,48 @@ namespace Pug.Scorpion
 		{
 		}
 
-		public IEnumerable<Payment._Info> GetPayments(Range<DateTime> period, IEnumerable<string> methods, IEnumerable<string> paymentTypes, IEnumerable<string> statuses, IEnumerable<string> currencies, IEnumerable<string> exchangeRates, Range<DateTime> registrationPeriod)
+
+		public void RegisterPayment(ref string identifier, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
+		{
+			IScorpionDataProvider dataStore = base.DataProviderFactory.GetSession();
+
+			dataStore.BeginTransaction();
+
+			try
+			{
+				if (string.IsNullOrEmpty(identifier))
+					identifier = GetNewPaymentIdentifier();
+				else
+					if (dataStore.OrderExists(identifier))
+						throw new OrderExists();
+
+				dataStore.InsertPayment(identifier, info.Identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier);
+
+				foreach( KeyValuePair<string, string> attribute in attributes)
+					dataStore.InsertPaymentAttribute(identifier, attribute.Key, attribute.Value);
+
+				dataStore.CommitTransaction();
+			}
+			catch
+			{
+				dataStore.RollbackTransaction();
+				throw;
+			}
+			finally
+			{
+				dataStore.Dispose();
+			}
+
+		}
+
+		public IEnumerable<Payment._Info> GetPayments(Range<DateTime> period, string method, string paymentType, string status, string currency)
 		{
 			throw new NotImplementedException();
+		}
+
+		public Payment GetPayment(string identifier)
+		{
+			return null;
 		}
 
 		public Payment GetPayment(string method, string transactionIdentifier)
@@ -343,7 +379,7 @@ namespace Pug.Scorpion
 			throw new NotImplementedException();
 		}
 
-		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod = null, Range<DateTime> lastFulfillmentProgressPeriod = null, IEnumerable<string> currentFulfillmentProgresssStatus = null, IEnumerable<string> currentFulfillmentProgressAssignee = null, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp = null)
+		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
 		{
 			throw new NotImplementedException();
 		}
