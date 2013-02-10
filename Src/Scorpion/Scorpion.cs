@@ -185,7 +185,7 @@ namespace Pug.Scorpion
 				if( orderInfo == null)
 					throw new OrderNotFound();
 
-				order = new Order(orderInfo, dataProviderFactory);
+				order = new Order(orderInfo, dataProviderFactory, synchronizationContext);
 
 				dataSession.Dispose();
 				dataSession = null;
