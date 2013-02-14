@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+using Pug.Application.Security;
+
 namespace Pug.Scorpion
 {
 	[DataContract]
@@ -15,7 +17,7 @@ namespace Pug.Scorpion
 			[DataMember]
 			DateTime startTimestamp, expectedCompletionTimestamp, registrationTimestamp;
 
-			public _Info(string identifier, DateTime startTimestamp, string status, DateTime expectedCompletionTimestamp, DateTime registrationTimestamp, string registrationUser)
+			public _Info(string identifier, string order, DateTime startTimestamp, string status, DateTime expectedCompletionTimestamp, DateTime completionTimestamp, DateTime registrationTimestamp, string registrationUser)
 			{
 				this.order = order;
 				this.identifier = identifier;
@@ -94,7 +96,7 @@ namespace Pug.Scorpion
 					}
 					protected set
 					{
-						this.identifier = identifier;
+						this.identifier = value;
 					}
 				}
 
@@ -142,9 +144,9 @@ namespace Pug.Scorpion
 			}
 
 			_Info info;
-			IDictionary<string, string> attributes;
+			IEnumerable<EntityAttribute> attributes;
 
-			public _Progress(_Info info, IDictionary<string, string> attributes)
+			public _Progress(_Info info, IEnumerable<EntityAttribute> attributes)
 			{
 				this.info = info;
 				this.attributes = attributes;
@@ -158,7 +160,7 @@ namespace Pug.Scorpion
 			}
 
 			[DataMember]
-			public IDictionary<string, string> Attributes
+			public IEnumerable<EntityAttribute> Attributes
 			{
 				get { return attributes; }
 				protected set { attributes = value; }
@@ -166,37 +168,27 @@ namespace Pug.Scorpion
 		}
 
 		_Info info;
-		IEnumerable<_Progress._Info> progress;
 
-		public OrderFulfillmentProcess(_Info info, IScorpionDataProviderFactory dataProviderFactory)
-			: base(dataProviderFactory)
+		object progressIdentifierSync = new object();
+
+		public OrderFulfillmentProcess(_Info info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
 		}
-		
-		public void RegisterProgress(ref string identifier, string assignee, IDictionary<string, string> attributes, string comment, DateTime timestamp, string status, DateTime expectedCompletionTimestamp)
-		{
-			throw new NotImplementedException();
-		}
 
-		public IEnumerable<_Progress._Info> GetProgresses()
+		string GetNewIdentifier(object sync)
 		{
-			return null;
-		}
+			byte[] binarySeed;
 
-		public _Progress GetProgress(string identifier)
-		{
-			return null;
-		}
+			lock (sync)
+			{
+				binarySeed = BitConverter.GetBytes(DateTime.UtcNow.ToBinary());
+			}
 
-		public void Cancel(IDictionary<string, string> attributes, string comment, DateTime timestamp)
-		{
-			throw new NotImplementedException();
-		}
+			string newIdentifier = Pug.Base32.From(binarySeed).Replace("=", "");
 
-		public void Finalize( IDictionary<string, string> attributes, string comment, DateTime timestamp)
-		{
-			throw new NotImplementedException();
+			return newIdentifier;
 		}
 
 		[DataMember]
@@ -206,11 +198,208 @@ namespace Pug.Scorpion
 			protected set { info = value; }
 		}
 
-		[DataMember]
-		public IEnumerable<_Progress._Info> Progress
+		public IEnumerable<EntityAttribute> GetAttributes()
 		{
-			get { return progress; }
-			protected set { progress = value; }
+			IScorpionDataProvider dataSession = null;
+
+			IEnumerable<EntityAttribute> attributes;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				attributes = dataSession.GetOrderFulfillmentAttributes(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			return attributes;
+		}
+				
+		public void RegisterProgress(ref string identifier, string assignee, IDictionary<string, string> attributes, string comment, DateTime timestamp, string status, DateTime expectedCompletionTimestamp)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.BeginTransaction();
+
+				if (string.IsNullOrEmpty(identifier))
+					identifier = GetNewIdentifier(progressIdentifierSync);
+				else
+					if (dataSession.OrderExists(identifier))
+						throw new OrderExists();
+
+				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, status, assignee, comment, expectedCompletionTimestamp, SecurityManager.CurrentUser.Identity.Identifier);
+
+				foreach(KeyValuePair<string, string> attribute in attributes)
+					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+
+				dataSession.CommitTransaction();
+			}
+			catch
+			{
+				dataSession.RollbackTransaction();
+
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+
+		public IEnumerable<_Progress._Info> GetProgresses()
+		{		
+			IScorpionDataProvider dataSession = null;
+
+			IEnumerable<OrderFulfillmentProcess._Progress._Info> progresses = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				progresses = dataSession.GetOrderFulfillmentProgresses(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+			
+			return progresses;
+		}
+
+		public _Progress GetProgress(string identifier)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			_Progress progress = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				progress = new _Progress(dataSession.GetOrderFulfillmentProgress(info.Identifier, identifier), dataSession.GetOrderFulfillmentProgressAttributes(info.Identifier, identifier));
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			return progress;
+		}
+
+		public void Cancel(IDictionary<string, string> attributes, string comment, DateTime timestamp)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				string identifier = GetNewIdentifier(progressIdentifierSync);
+
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.BeginTransaction();
+
+				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, "Cancellation", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
+
+				foreach (KeyValuePair<string, string> attribute in attributes)
+					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+
+				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment);
+
+				dataSession.CommitTransaction();
+
+				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+			}
+			catch
+			{
+				dataSession.RollbackTransaction();
+
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+
+		public void Finalize( IDictionary<string, string> attributes, string comment, DateTime timestamp)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				string identifier = GetNewIdentifier(progressIdentifierSync);
+
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.BeginTransaction();
+
+				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, "Finalization", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
+
+				foreach (KeyValuePair<string, string> attribute in attributes)
+					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+
+				dataSession.SetOrderStatus(info.Identifier, "FINALIZED", comment);
+
+				dataSession.CommitTransaction();
+
+				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+			}
+			catch
+			{
+				dataSession.RollbackTransaction();
+
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+
+		public override void Refresh()
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
 		}
 	}
 }

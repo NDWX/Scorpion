@@ -11,39 +11,12 @@ using Pug.Bizcotty.Geography;
 
 namespace Pug.Scorpion
 {
-	public class SynchronizationContext
-	{
-		object orderIdentifierSync = new object();
-		object paymentIdentifierSync = new object();
-		object fulfillmentProcessIdentifierSync = new object();
-
-		public object OrderIdentifierSync
-		{
-			get
-			{
-				return orderIdentifierSync;
-			}
-		}
-		public object PaymentIdentifierSync
-		{
-			get
-			{
-				return paymentIdentifierSync;
-			}
-		}
-		public object FulfillmentProcessIdentifierSync
-		{
-			get
-			{
-				return fulfillmentProcessIdentifierSync;
-			}
-		}
-	}
-
 	public class Scorpion<Pi, Pp> : Sisca.ISisca<Pi, Pp>
 		where Pi : Sisca.IProductInfo
 		where Pp : Sisca.IProductInfoProvider<Pi>
 	{
+		ISecurityManager securityManager;
+
 		IApplicationData<ICartInfoStoreProvider> cartStoreProviderFactory;
 		Cartage.ICartage cartage;
 		Pp productInfoProvider;
@@ -55,6 +28,7 @@ namespace Pug.Scorpion
 
 		public Scorpion(IApplicationData<ICartInfoStoreProvider> cartStoreProviderFactory, Pp productInfoProvider, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
 		{
+			this.securityManager = securityManager;
 			this.cartStoreProviderFactory = cartStoreProviderFactory;
 			this.dataProviderFactory = dataProviderFactory;
 			this.productInfoProvider = productInfoProvider;
@@ -152,7 +126,7 @@ namespace Pug.Scorpion
 					dataStore.InsertOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson);
 
 					foreach (ContactMethod contactMethod in contactMethods)
-						dataStore.InsertContactMethod(identifier, contactMethod);
+						dataStore.InsertContactMethod(identifier, contactMethod.Purpose, contactMethod.Name, contactMethod.Type, contactMethod.Destination);
 
 					foreach (KeyValuePair<string, string> attribute in attributes)
 						dataStore.SetOrderAttribute(identifier, attribute.Key, attribute.Value);
@@ -166,7 +140,7 @@ namespace Pug.Scorpion
 			}
 		}
 
-		IEnumerable<Cartage.ICartInfo> GetOrders(IEnumerable<string> status, Range<DateTime> creationPeriod, IEnumerable<string> creationUser, Range<DateTime> lastModificationPeriod, IEnumerable<string> lastModificationUser)
+		public IEnumerable<Cartage.ICartInfo> GetOrders(string status, Range<DateTime> creationPeriod, string creationUser, Range<DateTime> lastModificationPeriod, string lastModificationUser)
 		{
 			return null;
 		}
@@ -185,7 +159,7 @@ namespace Pug.Scorpion
 				if( orderInfo == null)
 					throw new OrderNotFound();
 
-				order = new Order(orderInfo, dataProviderFactory, synchronizationContext);
+				order = new Order(orderInfo, dataProviderFactory, synchronizationContext, securityManager);
 
 				dataSession.Dispose();
 				dataSession = null;
@@ -203,16 +177,20 @@ namespace Pug.Scorpion
             return order;
         }
 
-		void RegisterPayment(ref string identifier, string order, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
+		public void RegisterPayment(ref string identifier, string order, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
 		{
 			Order _order = GetOrder(order);
 
 			_order.RegisterPayment(ref identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier, attributes);
 		}
 
-		public IEnumerable<Payment._Info> GetPayments(string order, Range<DateTime> period, IEnumerable<string> methods, IEnumerable<string> paymentTypes, IEnumerable<string> statuses, IEnumerable<string> currencies, IEnumerable<string> exchangeRates, Range<DateTime> registrationPeriod)
+		public IEnumerable<Payment._Info> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, string exchangeRate, Range<DateTime> registrationPeriod)
 		{
-			throw new NotImplementedException();
+			Order _order = GetOrder(order);
+
+			IEnumerable<Payment._Info> orderPayments = _order.GetPayments(period, method, paymentType, status, currency, registrationPeriod);
+
+			return orderPayments;
 		}
 
 		public Payment GetPayment(string identifier)
@@ -225,7 +203,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = dataProviderFactory.GetSession();
 				paymentInfo = dataSession.GetPayment(identifier);
-				payment = new Payment(paymentInfo, dataProviderFactory);
+				payment = new Payment(paymentInfo, dataProviderFactory, securityManager);
 
 				dataSession.Dispose();
 				dataSession = null;
@@ -243,9 +221,13 @@ namespace Pug.Scorpion
 			return payment;
 		}
 
-		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(string order = "", Range<DateTime> lastFulfillmentProcessRegistrationPeriod = null, Range<DateTime> lastFulfillmentProgressPeriod = null, IEnumerable<string> currentFulfillmentProgresssStatus = null, IEnumerable<string> currentFulfillmentProgressAssignee = null, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp = null)
+		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(string order, Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
 		{
-			throw new NotImplementedException();
+			Order _order = GetOrder(order);
+
+			OrderFulfillmentProcess._Info[] fulfillmentProcesses = _order.GetFulfillmentProcesses(lastFulfillmentProcessRegistrationPeriod, expectedFulfillmentProcessCompletionTimestamp, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
+
+			return fulfillmentProcesses;
 		}
 
 		public OrderFulfillmentProcess GetFulfillmentProcess(string identifier)
@@ -258,7 +240,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = dataProviderFactory.GetSession();
 				fulfillmentProcessInfo = dataSession.GetOrderFulfillmentProcess(identifier);
-				fulfillmentProcess = new OrderFulfillmentProcess(fulfillmentProcessInfo, dataProviderFactory);
+				fulfillmentProcess = new OrderFulfillmentProcess(fulfillmentProcessInfo, dataProviderFactory, securityManager);
 
 				dataSession.Dispose();
 				dataSession = null;

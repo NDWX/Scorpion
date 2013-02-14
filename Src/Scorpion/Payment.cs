@@ -2,44 +2,13 @@
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
+using Pug.Application.Security;
 
 namespace Pug.Scorpion
 {
 	[DataContract]
 	public class Payment : Entity
 	{
-		_Info info;
-
-		public Payment(_Info info, IScorpionDataProviderFactory dataProviderFactory)
-			: base(dataProviderFactory)
-		{
-			this.info = info;
-		}
-
-		[DataMember]
-		public _Info Info
-		{
-		  get { return info; }
-		  set { info = value; }
-		}
-
-		public string this[string name]
-		{
-			get
-			{
-				return null;
-			}
-			set
-			{
-
-			}
-		}
-
-		public void Void(string comment)
-		{
-			throw new NotImplementedException();
-		}
-
 		[DataContract]
 		public class _Info
 		{
@@ -195,6 +164,58 @@ namespace Pug.Scorpion
 				get { return receiptIdentifier; }
 				protected set { receiptIdentifier = value; }
 			}
+		}
+		_Info info;
+
+		public Payment(_Info info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+			: base(dataProviderFactory, securityManager)
+		{
+			this.info = info;
+		}
+
+		[DataMember]
+		public _Info Info
+		{
+		  get { return info; }
+		  set { info = value; }
+		}
+
+		public string this[string name]
+		{
+			get
+			{
+				return null;
+			}
+			set
+			{
+
+			}
+		}
+
+		public void Void(string comment)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.SetOrderStatus(info.Identifier, PaymentStatus.Void, comment);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+
+		public override void Refresh()
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

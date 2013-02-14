@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 using System.Runtime.Serialization;
 
+using System.Transactions;
+
+using Pug.Application.Security;
+
 using Pug.Bizcotty;
 using Pug.Bizcotty.Geography;
 
@@ -202,6 +206,14 @@ namespace Pug.Scorpion
 			}
 		}
 
+		public class Summary
+		{
+			decimal totalPaymentReceived;
+			DateTime lastPaymentReceived;
+			string fulfillmentStatus;
+			DateTime lastFulfillmentProgress;
+		}
+
 		//[DataContract]
 		//public class ItemLine
 		//{
@@ -264,8 +276,8 @@ namespace Pug.Scorpion
 
 		SynchronizationContext synchronizationContext;
 
-		public Order(_Info info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext)
-			: base(dataProviderFactory)
+		public Order(_Info info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext, ISecurityManager securityManager)
+			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
 			this.synchronizationContext = synchronizationContext;
@@ -302,20 +314,99 @@ namespace Pug.Scorpion
 			protected set { info = value; }
 		}
 
-		public ICollection<ContactMethod> GetContactMethods(string purpose, string type)
+		public Summary GetSummary()
 		{
 			return null;
 		}
 
-		public void SetContactMethod(string purpose, string type, string destination)
+		public IEnumerable<ContactMethod> GetContactMethods(string purpose, string type)
 		{
+			IScorpionDataProvider dataSession = null;
+
+			IEnumerable<ContactMethod> contactMethods = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				contactMethods = dataSession.GetContactMethods(purpose, type);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			return contactMethods;
 		}
 
-		public void DeleteContactMethod(string purpose, string type)
+		public void AddContactMethod(string purpose, string name, string type, string destination)
 		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.InsertContactMethod(info.Identifier, purpose, name, type, destination);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if( dataSession != null )
+					dataSession.Dispose();
+			}
 		}
 
+		public void UpdateContactMethod(string purpose, string name, string type, string destination)
+		{
+			IScorpionDataProvider dataSession = null;
 
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.UpdateContactMethod(info.Identifier, purpose, name, type, destination);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+
+		public void DeleteContactMethod(string purpose, string name)
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.DeleteContactMethod(info.Identifier, purpose, name);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+		}
+		
 		public void RegisterPayment(ref string identifier, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
 		{
 			IScorpionDataProvider dataStore = base.DataProviderFactory.GetSession();
@@ -349,64 +440,259 @@ namespace Pug.Scorpion
 
 		}
 
-		public IEnumerable<Payment._Info> GetPayments(Range<DateTime> period, string method, string paymentType, string status, string currency)
+		public IEnumerable<Payment._Info> GetPayments(Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod)
 		{
-			throw new NotImplementedException();
+			IScorpionDataProvider dataSession = null;
+
+			IEnumerable<Payment._Info> payments = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				payments = dataSession.GetPayments(info.Identifier, period, method, paymentType, status, currency, registrationPeriod);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			return payments;
+			
 		}
 
 		public Payment GetPayment(string identifier)
 		{
-			return null;
-		}
+			IScorpionDataProvider dataSession = null;
 
-		public Payment GetPayment(string method, string transactionIdentifier)
-		{
-			throw new NotImplementedException();
-		}
+			Payment._Info paymentInfo = null;
 
-		public void VoidPayment(string method, string transactionIdentifier, string comment)
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				paymentInfo = dataSession.GetPayment(identifier, info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			if( paymentInfo != null )
+				return new Payment(paymentInfo, DataProviderFactory, SecurityManager);
+			else
+				return null;
+		}
+		
+		public void VoidPayment(string identifier, string comment)
 		{
-			throw new NotImplementedException();
+			GetPayment(identifier).Void(comment);
 		}
 
 		public void Cancel(string comment)
 		{
-			throw new NotImplementedException();
+			IScorpionDataProvider dataSession = null;
+			
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
 		}
 
 		public void RegisterFulfillmentProcess(ref string identifier, string asignee, IDictionary<string, string> attributes, string comment, DateTime timestamp, string status, DateTime expectedStatusCompletionTimestamp, DateTime expectedCompletionTimestamp)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required))
+				{
+					//RegisterOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, contactMethods, attributes);
+
+					IScorpionDataProvider dataStore = DataProviderFactory.GetSession();
+
+					if (string.IsNullOrEmpty(identifier))
+						identifier = GetNewFulfillmentProcessIdentifier();
+					else
+						if (dataStore.OrderExists(identifier))
+							throw new OrderExists();
+
+
+					dataStore.InsertFulfillmentProcess(identifier, asignee, comment, timestamp, status, expectedStatusCompletionTimestamp, expectedCompletionTimestamp);
+
+					foreach (KeyValuePair<string, string> attribute in attributes)
+						dataStore.InsertFulfillmentProcessAttribute(identifier, attribute.Key, attribute.Value);
+
+					transactionScope.Complete();
+				}
+			}
+			catch
+			{
+				throw;
+			}
 		}
 
 		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
 		{
-			throw new NotImplementedException();
-		}
+			IScorpionDataProvider dataSession = null;
 
-		public void CancelFulfillmentProcess(IDictionary<string, string> attributes, string comment, DateTime timestamp)
-		{
-			throw new NotImplementedException();
-		}
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
 
-		public void FinalizeFulfillmentProcess(IDictionary<string, string> attributes, string comment, DateTime timestamp)
-		{
-			throw new NotImplementedException();
+				return dataSession.GetFulfillmentProcesses(lastFulfillmentProcessRegistrationPeriod, lastFulfillmentProgressPeriod, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
 		}
 
 		public OrderFulfillmentProcess GetFulfillmentProcess(string identifier)
 		{
-			throw new NotImplementedException();
+			IScorpionDataProvider dataSession = null;
+
+			OrderFulfillmentProcess._Info fulfillmentProcessInfo = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				fulfillmentProcessInfo = dataSession.GetOrderFulfillmentProcess(identifier, info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
+
+			if (fulfillmentProcessInfo != null)
+				return new OrderFulfillmentProcess(fulfillmentProcessInfo, DataProviderFactory, SecurityManager);
+			else
+				return null;
+		}
+
+		public void CancelFulfillmentProcess(string identifier, IDictionary<string, string> attributes, string comment, DateTime timestamp)
+		{
+			GetFulfillmentProcess(identifier).Cancel(attributes, comment, timestamp);
+		}
+
+		public void FinalizeFulfillmentProcess(string identifier, IDictionary<string, string> attributes, string comment, DateTime timestamp)
+		{
+			GetFulfillmentProcess(identifier).Finalize(attributes, comment, timestamp);
+		}
+
+		public IEnumerable<EntityAttribute> GetAttributes()
+		{
+			IScorpionDataProvider dataSession = null;
+			
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				return dataSession.GetOrderAttributes(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
 		}
 
 		public string this[string attribute]
 		{
 			get
 			{
-				return null;
+				IScorpionDataProvider dataSession = null;
+
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					return dataSession.GetOrderAttribute(info.Identifier, attribute).Value;
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
 			}
 			set
 			{
+				IScorpionDataProvider dataSession = null;
+
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					dataSession.SetOrderAttribute(info.Identifier, attribute, value);
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
+			}
+		}
+
+		public override void Refresh()
+		{
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				info = dataSession.GetOrder(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
 			}
 		}
 	}

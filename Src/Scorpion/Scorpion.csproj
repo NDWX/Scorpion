@@ -76,13 +76,16 @@
     <Compile Include="ICartIntoStoreProviderFactory.cs" />
     <Compile Include="IScorpionDataProvider.cs" />
     <Compile Include="IScorpionDataProviderFactory.cs" />
+    <Compile Include="OrderAttribute.cs" />
     <Compile Include="OrderExists.cs" />
     <Compile Include="OrderNotFound.cs" />
+    <Compile Include="PaymentStatus.cs" />
     <Compile Include="Scorpion.cs" />
     <Compile Include="Order.cs" />
     <Compile Include="OrderFulfillmentProcess.cs" />
     <Compile Include="Payment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SynchronizationContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
