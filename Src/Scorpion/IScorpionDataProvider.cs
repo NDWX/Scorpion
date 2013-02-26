@@ -16,17 +16,17 @@ namespace Pug.Scorpion
 							string buyerName, Address buyerAddress, PersonName buyerContactPerson, 
 							string payerName, Address billingAddress, PersonName billingContactPerson,
 							decimal orderPriceTotal, decimal shippingCost, string buyerNote,
-							string shippingName, Address shippingAddress, PersonName shippingContactPerson);
+							string shippingName, Address shippingAddress, PersonName shippingContactPerson, string user);
 
 		IEnumerable<Cartage.ICartInfo> GetOrders(string status, Range<DateTime> creationPeriod, string creationUser, Range<DateTime> lastModificationPeriod, string lastModificationUser);
 
 		Order._Info GetOrder(string identifier);
 
-		void InsertContactMethod(string order, string purpose, string name, string type, string destination);
+		void InsertContactMethod(string order, string purpose, string name, string type, string destination, string user);
 
-		void SetOrderStatus(string identifier, string status, string comment);
+		void SetOrderStatus(string identifier, string status, string comment, string user);
 
-		void SetOrderAttribute(string order, string name, string value);
+		void SetOrderAttribute(string order, string name, string value, string user);
 
 		EntityAttribute GetOrderAttribute(string order, string name);
 
@@ -35,18 +35,22 @@ namespace Pug.Scorpion
 
 		IEnumerable<ContactMethod> GetContactMethods(string purpose, string type);
 
-		void UpdateContactMethod(string order, string purpose, string name, string type, string identifier);
+		void UpdateContactMethod(string order, string purpose, string name, string type, string identifier, string user);
 
-		void DeleteContactMethod(string order, string purpose, string name);
+		void DeleteContactMethod(string order, string purpose, string name, string user);
 
 
 		bool PaymentExists(string identifier);
 
 		void InsertPayment(string identifier, string order, DateTime timestamp, string method, string transcactionIdentifier,
 							string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, 
-							string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier);
+							string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, string user);
 
-		void InsertPaymentAttribute(string identifier, string name, string value);
+		IEnumerable<EntityAttribute> GetPaymentAttributes(string identifier);
+
+		void SetPaymentAttribute(string identifier, string name, string value, string user);
+
+		EntityAttribute GetPaymentAttribute(string identifier, string name);
 
 		IEnumerable<Payment._Info> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod);
 
@@ -54,31 +58,33 @@ namespace Pug.Scorpion
 
 		Payment._Info GetPayment(string identifier, string order);
 
-		void SetPaymentStatus(string identifier, string status, string comment);
+		void SetPaymentStatus(string identifier, string status, string comment, string user);
 
 
-		void InsertFulfillmentProcess(string identifier, string asignee, string comment, DateTime timestamp, string status, DateTime expectedStatusCompletionTimestamp, DateTime expectedCompletionTimestamp);
+		void InsertFulfillmentProcess(string identifier, string asignee, string comment, DateTime timestamp, string status, DateTime expectedStatusCompletionTimestamp, DateTime expectedCompletionTimestamp, string user);
 
-		void InsertFulfillmentProcessAttribute(string identifier, string name, string value);
+		void SetFulfillmentProcessAttribute(string identifier, string name, string value, string user);
 		
 		OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp);
 
-		OrderFulfillmentProcess._Info GetOrderFulfillmentProcess(string identifier);
+		OrderFulfillmentProcess._Info GetFulfillmentProcess(string identifier);
 
-		OrderFulfillmentProcess._Info GetOrderFulfillmentProcess(string identifier, string order);
+		OrderFulfillmentProcess._Info GetFulfillmentProcess(string identifier, string order);
 
-		IEnumerable<EntityAttribute> GetOrderFulfillmentAttributes(string process);
+		IEnumerable<EntityAttribute> GetFulfillmentProcessAttributes(string process);
 
-		void InsertOrderFulfillmentProgress(string process, string identifier, DateTime timestamp, string status, string assignee, string comment, DateTime completionTimestamp, string registrationUser);
+		EntityAttribute GetFulfillmentProcessAttribute(string process, string name);
 
-		void InsertOrderFUlfillmentProgressAttribute(string process, string identifier, string name, string value, string user);
+		void InsertFulfillmentProgress(string process, string identifier, DateTime timestamp, string status, string assignee, string comment, DateTime completionTimestamp, string registrationUser);
 
-		void SetOrderFulfillmentStatus(string identifier, string status, string comment, string user);
+		void InsertFulfillmentProgressAttribute(string process, string identifier, string name, string value, string user);
 
-		IEnumerable<OrderFulfillmentProcess._Progress._Info> GetOrderFulfillmentProgresses(string process);
+		void SetFulfillmentStatus(string identifier, string status, string comment, string user);
 
-		OrderFulfillmentProcess._Progress._Info GetOrderFulfillmentProgress(string process, string identifier);
+		IEnumerable<OrderFulfillmentProcess._Progress._Info> GetFulfillmentProgresses(string process);
 
-		IEnumerable<EntityAttribute> GetOrderFulfillmentProgressAttributes(string process, string identifier);
+		OrderFulfillmentProcess._Progress._Info GetFulfillmentProgress(string process, string identifier);
+
+		IEnumerable<EntityAttribute> GetFulfillmentProgressAttributes(string process, string identifier);
 	}
 }

@@ -352,7 +352,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				dataSession.InsertContactMethod(info.Identifier, purpose, name, type, destination);
+				dataSession.InsertContactMethod(info.Identifier, purpose, name, type, destination, SecurityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -373,7 +373,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				dataSession.UpdateContactMethod(info.Identifier, purpose, name, type, destination);
+				dataSession.UpdateContactMethod(info.Identifier, purpose, name, type, destination, SecurityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -394,7 +394,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				dataSession.DeleteContactMethod(info.Identifier, purpose, name);
+				dataSession.DeleteContactMethod(info.Identifier, purpose, name, SecurityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -421,10 +421,10 @@ namespace Pug.Scorpion
 					if (dataStore.OrderExists(identifier))
 						throw new OrderExists();
 
-				dataStore.InsertPayment(identifier, info.Identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier);
+				dataStore.InsertPayment(identifier, info.Identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier, SecurityManager.CurrentUser.Identity.Identifier);
 
 				foreach( KeyValuePair<string, string> attribute in attributes)
-					dataStore.InsertPaymentAttribute(identifier, attribute.Key, attribute.Value);
+					dataStore.SetPaymentAttribute(identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataStore.CommitTransaction();
 			}
@@ -507,7 +507,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment);
+				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment, SecurityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -537,10 +537,10 @@ namespace Pug.Scorpion
 							throw new OrderExists();
 
 
-					dataStore.InsertFulfillmentProcess(identifier, asignee, comment, timestamp, status, expectedStatusCompletionTimestamp, expectedCompletionTimestamp);
+					dataStore.InsertFulfillmentProcess(identifier, asignee, comment, timestamp, status, expectedStatusCompletionTimestamp, expectedCompletionTimestamp, SecurityManager.CurrentUser.Identity.Identifier);
 
 					foreach (KeyValuePair<string, string> attribute in attributes)
-						dataStore.InsertFulfillmentProcessAttribute(identifier, attribute.Key, attribute.Value);
+						dataStore.SetFulfillmentProcessAttribute(identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
 					transactionScope.Complete();
 				}
@@ -582,7 +582,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				fulfillmentProcessInfo = dataSession.GetOrderFulfillmentProcess(identifier, info.Identifier);
+				fulfillmentProcessInfo = dataSession.GetFulfillmentProcess(identifier, info.Identifier);
 			}
 			catch
 			{
@@ -661,7 +661,7 @@ namespace Pug.Scorpion
 				{
 					dataSession = DataProviderFactory.GetSession();
 
-					dataSession.SetOrderAttribute(info.Identifier, attribute, value);
+					dataSession.SetOrderAttribute(info.Identifier, attribute, value, SecurityManager.CurrentUser.Identity.Identifier);
 				}
 				catch
 				{

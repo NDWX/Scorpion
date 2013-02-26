@@ -123,13 +123,13 @@ namespace Pug.Scorpion
 
 					cartInfoStore.FinalizeCart(cart);
 
-					dataStore.InsertOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson);
+					dataStore.InsertOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, securityManager.CurrentUser.Identity.Identifier);
 
 					foreach (ContactMethod contactMethod in contactMethods)
-						dataStore.InsertContactMethod(identifier, contactMethod.Purpose, contactMethod.Name, contactMethod.Type, contactMethod.Destination);
+						dataStore.InsertContactMethod(identifier, contactMethod.Purpose, contactMethod.Name, contactMethod.Type, contactMethod.Destination, securityManager.CurrentUser.Identity.Identifier);
 
 					foreach (KeyValuePair<string, string> attribute in attributes)
-						dataStore.SetOrderAttribute(identifier, attribute.Key, attribute.Value);
+						dataStore.SetOrderAttribute(identifier, attribute.Key, attribute.Value, securityManager.CurrentUser.Identity.Identifier);
 
 					transactionScope.Complete();
 				}
@@ -239,7 +239,7 @@ namespace Pug.Scorpion
 			try
 			{
 				dataSession = dataProviderFactory.GetSession();
-				fulfillmentProcessInfo = dataSession.GetOrderFulfillmentProcess(identifier);
+				fulfillmentProcessInfo = dataSession.GetFulfillmentProcess(identifier);
 				fulfillmentProcess = new OrderFulfillmentProcess(fulfillmentProcessInfo, dataProviderFactory, securityManager);
 
 				dataSession.Dispose();

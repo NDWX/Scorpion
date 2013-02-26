@@ -184,11 +184,66 @@ namespace Pug.Scorpion
 		{
 			get
 			{
-				return null;
+				IScorpionDataProvider dataSession = null;
+
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					return dataSession.GetPaymentAttribute(info.Identifier, name).Name;
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
 			}
 			set
 			{
+				IScorpionDataProvider dataSession = null;
 
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					dataSession.SetOrderAttribute(info.Identifier, name, value, SecurityManager.CurrentUser.Identity.Identifier);
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
+
+			}
+		}
+
+		public IEnumerable<EntityAttribute> GetAttributes()
+		{
+
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				return dataSession.GetPaymentAttributes(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
 			}
 		}
 
@@ -200,7 +255,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				dataSession.SetOrderStatus(info.Identifier, PaymentStatus.Void, comment);
+				dataSession.SetOrderStatus(info.Identifier, PaymentStatus.Void, comment, SecurityManager.CurrentUser.Identity.Identifier);
 			}
 			catch
 			{
@@ -215,7 +270,23 @@ namespace Pug.Scorpion
 
 		public override void Refresh()
 		{
-			throw new NotImplementedException();
+			IScorpionDataProvider dataSession = null;
+
+			try
+			{
+				dataSession = DataProviderFactory.GetSession();
+
+				info = dataSession.GetPayment(info.Identifier);
+			}
+			catch
+			{
+				throw;
+			}
+			finally
+			{
+				if (dataSession != null)
+					dataSession.Dispose();
+			}
 		}
 	}
 }

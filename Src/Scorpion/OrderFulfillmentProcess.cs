@@ -208,7 +208,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				attributes = dataSession.GetOrderFulfillmentAttributes(info.Identifier);
+				attributes = dataSession.GetFulfillmentProcessAttributes(info.Identifier);
 			}
 			catch
 			{
@@ -221,6 +221,50 @@ namespace Pug.Scorpion
 			}
 
 			return attributes;
+		}
+
+		public string this[string name]
+		{
+			get
+			{
+				IScorpionDataProvider dataSession = null;
+
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					return dataSession.GetFulfillmentProcessAttribute(info.Identifier, name).Value;
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
+			}
+			set
+			{
+				IScorpionDataProvider dataSession = null;
+
+				try
+				{
+					dataSession = DataProviderFactory.GetSession();
+
+					dataSession.SetFulfillmentProcessAttribute(info.Identifier, name, value, SecurityManager.CurrentUser.Identity.Identifier);
+				}
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if (dataSession != null)
+						dataSession.Dispose();
+				}
+			}
 		}
 				
 		public void RegisterProgress(ref string identifier, string assignee, IDictionary<string, string> attributes, string comment, DateTime timestamp, string status, DateTime expectedCompletionTimestamp)
@@ -239,10 +283,10 @@ namespace Pug.Scorpion
 					if (dataSession.OrderExists(identifier))
 						throw new OrderExists();
 
-				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, status, assignee, comment, expectedCompletionTimestamp, SecurityManager.CurrentUser.Identity.Identifier);
+				dataSession.InsertFulfillmentProgress(info.Identifier, identifier, timestamp, status, assignee, comment, expectedCompletionTimestamp, SecurityManager.CurrentUser.Identity.Identifier);
 
 				foreach(KeyValuePair<string, string> attribute in attributes)
-					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+					dataSession.InsertFulfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataSession.CommitTransaction();
 			}
@@ -269,7 +313,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				progresses = dataSession.GetOrderFulfillmentProgresses(info.Identifier);
+				progresses = dataSession.GetFulfillmentProgresses(info.Identifier);
 			}
 			catch
 			{
@@ -294,7 +338,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				progress = new _Progress(dataSession.GetOrderFulfillmentProgress(info.Identifier, identifier), dataSession.GetOrderFulfillmentProgressAttributes(info.Identifier, identifier));
+				progress = new _Progress(dataSession.GetFulfillmentProgress(info.Identifier, identifier), dataSession.GetFulfillmentProgressAttributes(info.Identifier, identifier));
 			}
 			catch
 			{
@@ -321,16 +365,16 @@ namespace Pug.Scorpion
 
 				dataSession.BeginTransaction();
 
-				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, "Cancellation", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
+				dataSession.InsertFulfillmentProgress(info.Identifier, identifier, timestamp, "Cancellation", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
 
 				foreach (KeyValuePair<string, string> attribute in attributes)
-					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+					dataSession.InsertFulfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
-				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment);
+				dataSession.SetOrderStatus(info.Identifier, "CANCELLED", comment, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataSession.CommitTransaction();
 
-				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+				info = dataSession.GetFulfillmentProcess(info.Identifier);
 			}
 			catch
 			{
@@ -357,16 +401,16 @@ namespace Pug.Scorpion
 
 				dataSession.BeginTransaction();
 
-				dataSession.InsertOrderFulfillmentProgress(info.Identifier, identifier, timestamp, "Finalization", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
+				dataSession.InsertFulfillmentProgress(info.Identifier, identifier, timestamp, "Finalization", string.Empty, comment, timestamp, SecurityManager.CurrentUser.Identity.Identifier);
 
 				foreach (KeyValuePair<string, string> attribute in attributes)
-					dataSession.InsertOrderFUlfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
+					dataSession.InsertFulfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
-				dataSession.SetOrderStatus(info.Identifier, "FINALIZED", comment);
+				dataSession.SetOrderStatus(info.Identifier, "FINALIZED", comment, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataSession.CommitTransaction();
 
-				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+				info = dataSession.GetFulfillmentProcess(info.Identifier);
 			}
 			catch
 			{
@@ -389,7 +433,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				info = dataSession.GetOrderFulfillmentProcess(info.Identifier);
+				info = dataSession.GetFulfillmentProcess(info.Identifier);
 			}
 			catch
 			{
