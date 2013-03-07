@@ -7,10 +7,10 @@ using Pug.Application.Security;
 namespace Pug.Scorpion
 {
 	[DataContract]
-	public class OrderFulfillmentProcess : Entity
+	public class OrderFulfillmentProcess : Entity, Pug.Scorpion.IFulfillmentProcess
 	{
 		[DataContract]
-		public class _Info
+		public class _Info : Pug.Scorpion.IFulfillmentProcessInfo
 		{
 			string order, identifier, status, registrationUser;
 
@@ -79,10 +79,10 @@ namespace Pug.Scorpion
 		}
 
 		[DataContract]
-		public class _Progress
+		public class _Progress : Pug.Scorpion.IFulfillmentProgress
 		{
 			[DataContract]
-			public class _Info
+			public class _Info : Pug.Scorpion.IFulfillmentProgressInfo
 			{
 				DateTime timestamp, expectedCompletionTimestamp, registrationTimestamp;
 				string identifier, comment, status, registrationUser;
@@ -143,17 +143,17 @@ namespace Pug.Scorpion
 				}
 			}
 
-			_Info info;
+			IFulfillmentProgressInfo info;
 			IEnumerable<EntityAttribute> attributes;
 
-			public _Progress(_Info info, IEnumerable<EntityAttribute> attributes)
+			public _Progress(IFulfillmentProgressInfo info, IEnumerable<EntityAttribute> attributes)
 			{
 				this.info = info;
 				this.attributes = attributes;
 			}
 
 			[DataMember]
-			public _Info Info
+			public IFulfillmentProgressInfo Info
 			{
 				get { return info; }
 				protected set { info = value; }
@@ -167,11 +167,11 @@ namespace Pug.Scorpion
 			}
 		}
 
-		_Info info;
+		IFulfillmentProcessInfo info;
 
 		object progressIdentifierSync = new object();
 
-		public OrderFulfillmentProcess(_Info info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public OrderFulfillmentProcess(IFulfillmentProcessInfo info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
@@ -192,7 +192,7 @@ namespace Pug.Scorpion
 		}
 
 		[DataMember]
-		public _Info Info
+		public IFulfillmentProcessInfo Info
 		{
 			get { return info; }
 			protected set { info = value; }
@@ -303,11 +303,11 @@ namespace Pug.Scorpion
 			}
 		}
 
-		public IEnumerable<_Progress._Info> GetProgresses()
+		public IEnumerable<IFulfillmentProgressInfo> GetProgresses()
 		{		
 			IScorpionDataProvider dataSession = null;
 
-			IEnumerable<OrderFulfillmentProcess._Progress._Info> progresses = null;
+			IEnumerable<IFulfillmentProgressInfo> progresses = null;
 
 			try
 			{
@@ -328,11 +328,11 @@ namespace Pug.Scorpion
 			return progresses;
 		}
 
-		public _Progress GetProgress(string identifier)
+		public IFulfillmentProgress GetProgress(string identifier)
 		{
 			IScorpionDataProvider dataSession = null;
 
-			_Progress progress = null;
+			IFulfillmentProgress progress = null;
 
 			try
 			{

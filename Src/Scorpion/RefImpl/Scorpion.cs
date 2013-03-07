@@ -11,7 +11,7 @@ using Pug.Bizcotty.Geography;
 
 namespace Pug.Scorpion
 {
-	public class Scorpion<Pi, Pp> : Sisca.ISisca<Pi, Pp>
+	public class Scorpion<Pi, Pp> : IScorpion<Pi,Pp>
 		where Pi : Sisca.IProductInfo
 		where Pp : Sisca.IProductInfoProvider<Pi>
 	{
@@ -145,11 +145,11 @@ namespace Pug.Scorpion
 			return null;
 		}
 
-        public Order GetOrder(string identifier)
+        public IOrder GetOrder(string identifier)
         {
 			IScorpionDataProvider dataSession = null;
-			Order._Info orderInfo;
-			Order order;
+			IOrderInfo orderInfo;
+			IOrder order;
 
 			try
 			{
@@ -179,25 +179,25 @@ namespace Pug.Scorpion
 
 		public void RegisterPayment(ref string identifier, string order, DateTime timestamp, string method, string transactionIdentifier, string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, IDictionary<string, string> attributes)
 		{
-			Order _order = GetOrder(order);
+			IOrder _order = GetOrder(order);
 
 			_order.RegisterPayment(ref identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier, attributes);
 		}
 
-		public IEnumerable<Payment._Info> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, string exchangeRate, Range<DateTime> registrationPeriod)
+		public IEnumerable<IPaymentInfo> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, string exchangeRate, Range<DateTime> registrationPeriod)
 		{
-			Order _order = GetOrder(order);
+			IOrder _order = GetOrder(order);
 
-			IEnumerable<Payment._Info> orderPayments = _order.GetPayments(period, method, paymentType, status, currency, registrationPeriod);
+			IEnumerable<IPaymentInfo> orderPayments = _order.GetPayments(period, method, paymentType, status, currency, registrationPeriod);
 
 			return orderPayments;
 		}
 
-		public Payment GetPayment(string identifier)
+		public IPayment GetPayment(string identifier)
 		{
 			IScorpionDataProvider dataSession = null;
-			Payment._Info paymentInfo;
-			Payment payment;
+			IPaymentInfo paymentInfo;
+			IPayment payment;
 
 			try
 			{
@@ -221,20 +221,20 @@ namespace Pug.Scorpion
 			return payment;
 		}
 
-		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(string order, Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
+		public IEnumerable<IFulfillmentProcessInfo> GetFulfillmentProcesses(string order, Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
 		{
-			Order _order = GetOrder(order);
+			IOrder _order = GetOrder(order);
 
-			OrderFulfillmentProcess._Info[] fulfillmentProcesses = _order.GetFulfillmentProcesses(lastFulfillmentProcessRegistrationPeriod, expectedFulfillmentProcessCompletionTimestamp, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
+			IEnumerable<IFulfillmentProcessInfo> fulfillmentProcesses = _order.GetFulfillmentProcesses(lastFulfillmentProcessRegistrationPeriod, expectedFulfillmentProcessCompletionTimestamp, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
 
 			return fulfillmentProcesses;
 		}
 
-		public OrderFulfillmentProcess GetFulfillmentProcess(string identifier)
+		public IFulfillmentProcess GetFulfillmentProcess(string identifier)
 		{
 			IScorpionDataProvider dataSession = null;
-			OrderFulfillmentProcess._Info fulfillmentProcessInfo;
-			OrderFulfillmentProcess fulfillmentProcess;
+			IFulfillmentProcessInfo fulfillmentProcessInfo;
+			IFulfillmentProcess fulfillmentProcess;
 
 			try
 			{

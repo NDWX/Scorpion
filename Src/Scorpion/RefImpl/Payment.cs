@@ -7,10 +7,10 @@ using Pug.Application.Security;
 namespace Pug.Scorpion
 {
 	[DataContract]
-	public class Payment : Entity
+	public class Payment : Entity, Pug.Scorpion.IPayment
 	{
 		[DataContract]
-		public class _Info
+		public class _Info : Pug.Scorpion.IPaymentInfo
 		{
 			string identifier, order;
 			DateTime timestamp;
@@ -165,16 +165,16 @@ namespace Pug.Scorpion
 				protected set { receiptIdentifier = value; }
 			}
 		}
-		_Info info;
+		IPaymentInfo info;
 
-		public Payment(_Info info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public Payment(IPaymentInfo info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
 		}
 
 		[DataMember]
-		public _Info Info
+		public IPaymentInfo Info
 		{
 		  get { return info; }
 		  set { info = value; }

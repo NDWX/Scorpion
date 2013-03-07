@@ -7,7 +7,7 @@ using Pug.Application.Data;
 
 namespace Pug.Scorpion
 {
-	public class EntityAttribute
+	public class EntityAttribute : Pug.Scorpion.IEntityAttribute
 	{
 		string name, value, lastModificationUser;
 		DateTime lastModificationTimestamp;

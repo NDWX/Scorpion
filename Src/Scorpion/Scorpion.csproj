@@ -8,7 +8,7 @@
     <ProjectGuid>{35193146-7DB5-4CED-9247-6DD2C9048EAB}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Scorpion</RootNamespace>
+    <RootNamespace>Pug.Scorpion</RootNamespace>
     <AssemblyName>Scorpion</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -72,18 +72,28 @@
     <Compile Include="CartFinalized.cs" />
     <Compile Include="ContactMethod.cs" />
     <Compile Include="Entity.cs" />
-    <Compile Include="ICartInfoStoreProvider.cs" />
-    <Compile Include="ICartIntoStoreProviderFactory.cs" />
+    <Compile Include="RefImpl\ICartInfoStoreProvider.cs" />
+    <Compile Include="RefImpl\ICartIntoStoreProviderFactory.cs" />
+    <Compile Include="IEntityAttribute.cs" />
     <Compile Include="IScorpionDataProvider.cs" />
     <Compile Include="IScorpionDataProviderFactory.cs" />
     <Compile Include="OrderAttribute.cs" />
     <Compile Include="OrderExists.cs" />
     <Compile Include="OrderNotFound.cs" />
     <Compile Include="PaymentStatus.cs" />
-    <Compile Include="Scorpion.cs" />
-    <Compile Include="Order.cs" />
-    <Compile Include="OrderFulfillmentProcess.cs" />
-    <Compile Include="Payment.cs" />
+    <Compile Include="IScorpion.cs" />
+    <Compile Include="IOrder.cs" />
+    <Compile Include="IOrderInfo.cs" />
+    <Compile Include="IFulfillmentProcess.cs" />
+    <Compile Include="IFulfillmentProcessInfo.cs" />
+    <Compile Include="IFulfillmentProgress.cs" />
+    <Compile Include="IFulfillmentProgressInfo.cs" />
+    <Compile Include="IPayment.cs" />
+    <Compile Include="IPaymentInfo.cs" />
+    <Compile Include="RefImpl\Scorpion.cs" />
+    <Compile Include="RefImpl\Order.cs" />
+    <Compile Include="RefImpl\OrderFulfillmentProcess.cs" />
+    <Compile Include="RefImpl\Payment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SynchronizationContext.cs" />
   </ItemGroup>

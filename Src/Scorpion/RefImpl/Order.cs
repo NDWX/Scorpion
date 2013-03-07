@@ -14,10 +14,10 @@ using Pug.Bizcotty.Geography;
 namespace Pug.Scorpion
 {
 	[DataContract]
-	public class Order : Entity
+	public class Order : Entity, IOrder
 	{
 		[DataContract]
-		public class _Info
+		public class _Info : IOrderInfo
 		{
 			string identifier;
 			string buyerName;//, buyerEmailAddress, buyerContactNumber;
@@ -214,69 +214,11 @@ namespace Pug.Scorpion
 			DateTime lastFulfillmentProgress;
 		}
 
-		//[DataContract]
-		//public class ItemLine
-		//{
-		//    string identifier, productIdentifier, productCategory, productName;
-		//    decimal quantity, unitPrice;
-
-		//    public ItemLine(string identifier, string productIdentifier, string productCategory, string productName, decimal quantity, decimal unitPrice)
-		//    {
-		//        this.identifier = identifier;
-		//        this.productIdentifier = productIdentifier;
-		//        this.productCategory = productCategory;
-		//        this.productName = productName;
-		//    }
-
-		//    [DataMember]
-		//    public string Identifier
-		//    {
-		//        get { return identifier; }
-		//        protected set { identifier = value; }
-		//    }
-
-		//    [DataMember]
-		//    public string ProductIdentifier
-		//    {
-		//        get { return productIdentifier; }
-		//        protected set { productIdentifier = value; }
-		//    }
-
-		//    [DataMember]
-		//    public string ProductCategory
-		//    {
-		//        get { return productCategory; }
-		//        protected set { productCategory = value; }
-		//    }
-
-		//    [DataMember]
-		//    public string ProductName
-		//    {
-		//        get { return productName; }
-		//        protected set { productName = value; }
-		//    }
-
-		//    [DataMember]
-		//    public decimal Quantity
-		//    {
-		//        get { return quantity; }
-		//        protected set { quantity = value; }
-		//    }
-
-		//    [DataMember]
-		//    public decimal UnitPrice
-		//    {
-		//        get { return unitPrice; }
-		//        protected set { unitPrice = value; }
-		//    }
-		//}
-
-		_Info info;
-		//IEnumerable<OrderFulfillmentProcess._Info> fulfillmentProcesses;
+		IOrderInfo info;
 
 		SynchronizationContext synchronizationContext;
 
-		public Order(_Info info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext, ISecurityManager securityManager)
+		public Order(IOrderInfo info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
@@ -308,7 +250,7 @@ namespace Pug.Scorpion
 		}
 
 		[DataMember]
-		public _Info Info
+		public IOrderInfo Info
 		{
 			get { return info; }
 			protected set { info = value; }
@@ -440,11 +382,11 @@ namespace Pug.Scorpion
 
 		}
 
-		public IEnumerable<Payment._Info> GetPayments(Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod)
+		public IEnumerable<IPaymentInfo> GetPayments(Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod)
 		{
 			IScorpionDataProvider dataSession = null;
 
-			IEnumerable<Payment._Info> payments = null;
+			IEnumerable<IPaymentInfo> payments = null;
 
 			try
 			{
@@ -466,11 +408,11 @@ namespace Pug.Scorpion
 			
 		}
 
-		public Payment GetPayment(string identifier)
+		public IPayment GetPayment(string identifier)
 		{
 			IScorpionDataProvider dataSession = null;
 
-			Payment._Info paymentInfo = null;
+			IPaymentInfo paymentInfo = null;
 
 			try
 			{
@@ -551,7 +493,7 @@ namespace Pug.Scorpion
 			}
 		}
 
-		public OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
+		public IEnumerable<IFulfillmentProcessInfo> GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp)
 		{
 			IScorpionDataProvider dataSession = null;
 
@@ -572,11 +514,11 @@ namespace Pug.Scorpion
 			}
 		}
 
-		public OrderFulfillmentProcess GetFulfillmentProcess(string identifier)
+		public IFulfillmentProcess GetFulfillmentProcess(string identifier)
 		{
 			IScorpionDataProvider dataSession = null;
 
-			OrderFulfillmentProcess._Info fulfillmentProcessInfo = null;
+			IFulfillmentProcessInfo fulfillmentProcessInfo = null;
 
 			try
 			{

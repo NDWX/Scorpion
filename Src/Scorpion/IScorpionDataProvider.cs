@@ -20,7 +20,7 @@ namespace Pug.Scorpion
 
 		IEnumerable<Cartage.ICartInfo> GetOrders(string status, Range<DateTime> creationPeriod, string creationUser, Range<DateTime> lastModificationPeriod, string lastModificationUser);
 
-		Order._Info GetOrder(string identifier);
+		IOrderInfo GetOrder(string identifier);
 
 		void InsertContactMethod(string order, string purpose, string name, string type, string destination, string user);
 
@@ -52,11 +52,11 @@ namespace Pug.Scorpion
 
 		EntityAttribute GetPaymentAttribute(string identifier, string name);
 
-		IEnumerable<Payment._Info> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod);
+		IEnumerable<IPaymentInfo> GetPayments(string order, Range<DateTime> period, string method, string paymentType, string status, string currency, Range<DateTime> registrationPeriod);
 
-		Payment._Info GetPayment(string identifier);
+		IPaymentInfo GetPayment(string identifier);
 
-		Payment._Info GetPayment(string identifier, string order);
+		IPaymentInfo GetPayment(string identifier, string order);
 
 		void SetPaymentStatus(string identifier, string status, string comment, string user);
 
@@ -65,11 +65,11 @@ namespace Pug.Scorpion
 
 		void SetFulfillmentProcessAttribute(string identifier, string name, string value, string user);
 		
-		OrderFulfillmentProcess._Info[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp);
+		IFulfillmentProcessInfo[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp);
 
-		OrderFulfillmentProcess._Info GetFulfillmentProcess(string identifier);
+		IFulfillmentProcessInfo GetFulfillmentProcess(string identifier);
 
-		OrderFulfillmentProcess._Info GetFulfillmentProcess(string identifier, string order);
+		IFulfillmentProcessInfo GetFulfillmentProcess(string identifier, string order);
 
 		IEnumerable<EntityAttribute> GetFulfillmentProcessAttributes(string process);
 
@@ -81,9 +81,9 @@ namespace Pug.Scorpion
 
 		void SetFulfillmentStatus(string identifier, string status, string comment, string user);
 
-		IEnumerable<OrderFulfillmentProcess._Progress._Info> GetFulfillmentProgresses(string process);
+		IEnumerable<IFulfillmentProgressInfo> GetFulfillmentProgresses(string process);
 
-		OrderFulfillmentProcess._Progress._Info GetFulfillmentProgress(string process, string identifier);
+		IFulfillmentProgressInfo GetFulfillmentProgress(string process, string identifier);
 
 		IEnumerable<EntityAttribute> GetFulfillmentProgressAttributes(string process, string identifier);
 	}
