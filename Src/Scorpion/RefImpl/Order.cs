@@ -34,6 +34,10 @@ namespace Pug.Scorpion
 			Address shippingAddress;
 			//string shippingContactNumber;
 
+			int numberOfPaymentsReceived;
+			decimal totalPaymentsReceived;
+			DateTime lastPaymentReceivedTimestamp;
+
 			string status;
 
 			string registrationUser, lastModificationUser;
@@ -141,6 +145,24 @@ namespace Pug.Scorpion
 			}
 
 			[DataMember]
+			public int NumberOfPaymentsReceived
+			{
+				get { return this.numberOfPaymentsReceived; }
+			}
+
+			[DataMember]
+			public decimal TotalPaymentsReceived
+			{
+				get { return this.totalPaymentsReceived; }
+			}
+
+			[DataMember]
+			public DateTime LastPaymentReceivedTimestamp
+			{
+				get { return this.lastPaymentReceivedTimestamp; }
+			}
+
+			[DataMember]
 			public string BuyerNote
 			{
 				get
@@ -206,14 +228,6 @@ namespace Pug.Scorpion
 			}
 		}
 
-		public class Summary
-		{
-			decimal totalPaymentReceived;
-			DateTime lastPaymentReceived;
-			string fulfillmentStatus;
-			DateTime lastFulfillmentProgress;
-		}
-
 		IOrderInfo info;
 
 		SynchronizationContext synchronizationContext;
@@ -254,11 +268,6 @@ namespace Pug.Scorpion
 		{
 			get { return info; }
 			protected set { info = value; }
-		}
-
-		public Summary GetSummary()
-		{
-			return null;
 		}
 
 		public IEnumerable<ContactMethod> GetContactMethods(string purpose, string type)
@@ -369,6 +378,8 @@ namespace Pug.Scorpion
 					dataStore.SetPaymentAttribute(identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataStore.CommitTransaction();
+
+				info = dataStore.GetOrder(info.Identifier);
 			}
 			catch
 			{
@@ -464,21 +475,22 @@ namespace Pug.Scorpion
 
 		public void RegisterFulfillmentProcess(ref string identifier, string asignee, IDictionary<string, string> attributes, string comment, DateTime timestamp, string status, DateTime expectedStatusCompletionTimestamp, DateTime expectedCompletionTimestamp)
 		{
-			try
+			IScorpionDataProvider dataStore = null;
+
+			using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required))
 			{
-				using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required))
+				try
 				{
 					//RegisterOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, contactMethods, attributes);
 
-					IScorpionDataProvider dataStore = DataProviderFactory.GetSession();
+					dataStore = DataProviderFactory.GetSession();
 
 					if (string.IsNullOrEmpty(identifier))
 						identifier = GetNewFulfillmentProcessIdentifier();
 					else
 						if (dataStore.OrderExists(identifier))
 							throw new OrderExists();
-
-
+							
 					dataStore.InsertFulfillmentProcess(identifier, asignee, comment, timestamp, status, expectedStatusCompletionTimestamp, expectedCompletionTimestamp, SecurityManager.CurrentUser.Identity.Identifier);
 
 					foreach (KeyValuePair<string, string> attribute in attributes)
@@ -486,10 +498,15 @@ namespace Pug.Scorpion
 
 					transactionScope.Complete();
 				}
-			}
-			catch
-			{
-				throw;
+				catch
+				{
+					throw;
+				}
+				finally
+				{
+					if( dataStore != null)
+						dataStore.Dispose();
+				}
 			}
 		}
 

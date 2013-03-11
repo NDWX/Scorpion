@@ -1,24 +1,59 @@
 ﻿using System;
+
+using Pug.Bizcotty;
+using Pug.Bizcotty.Geography;
+
 namespace Pug.Scorpion
 {
 	public interface IOrderInfo
 	{
-		Pug.Bizcotty.Geography.Address BillingAddress { get; set; }
-		Pug.Bizcotty.PersonName BillingContactPerson { get; set; }
-		Pug.Bizcotty.Geography.Address BuyerAddress { get; }
-		Pug.Bizcotty.PersonName BuyerContactPerson { get; }
+		Address BillingAddress { get; }
+
+		PersonName BillingContactPerson { get; }
+
+		Address BuyerAddress { get; }
+
+		PersonName BuyerContactPerson { get; }
+
 		string BuyerName { get; }
+
 		string BuyerNote { get; }
+
 		string Identifier { get; }
+
 		DateTime LastModificationTimestamp { get; }
+
 		string LastModificationUser { get; }
+
 		decimal OrderPriceTotal { get; }
-		string PayerName { get; set; }
+
+		string PayerName { get; }
+
+		int NumberOfPaymentsReceived
+		{
+			get;
+		}
+
+		decimal TotalPaymentsReceived
+		{
+			get;
+		}
+
+		DateTime LastPaymentReceivedTimestamp
+		{
+			get;
+		}
+
 		DateTime RegistrationTimestamp { get; }
+
 		string RegistrationUser { get; }
-		Pug.Bizcotty.Geography.Address ShippingAddress { get; }
-		Pug.Bizcotty.PersonName ShippingContactPerson { get; }
+
+		Address ShippingAddress { get; }
+
+		PersonName ShippingContactPerson { get; }
+
 		decimal ShippingCost { get; }
+
 		string Status { get; }
 	}
 }

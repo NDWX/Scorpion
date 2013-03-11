@@ -13,8 +13,6 @@ namespace Pug.Scorpion
 
 		string this[string attribute] { get; set; }
 
-		Order.Summary GetSummary();
-
 		System.Collections.Generic.IEnumerable<EntityAttribute> GetAttributes();
 
 		void AddContactMethod(string purpose, string name, string type, string destination);

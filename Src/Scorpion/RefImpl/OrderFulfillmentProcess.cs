@@ -289,6 +289,8 @@ namespace Pug.Scorpion
 					dataSession.InsertFulfillmentProgressAttribute(info.Identifier, identifier, attribute.Key, attribute.Value, SecurityManager.CurrentUser.Identity.Identifier);
 
 				dataSession.CommitTransaction();
+
+				info = dataSession.GetFulfillmentProcess(info.Identifier);
 			}
 			catch
 			{

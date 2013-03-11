@@ -42,9 +42,7 @@ namespace Pug.Scorpion
 
 		bool PaymentExists(string identifier);
 
-		void InsertPayment(string identifier, string order, DateTime timestamp, string method, string transcactionIdentifier,
-							string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, 
-							string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, string user);
+		void InsertPayment(string identifier, string order, DateTime timestamp, string method, string transcactionIdentifier,							string transactionType, string status, string statusShortMessage, string statusLongMessage, string paymentType, string currency, decimal amount, decimal fee, decimal finalAmount, decimal taxAmount, decimal exchangeRate, string receiptIdentifier, string user);
 
 		IEnumerable<EntityAttribute> GetPaymentAttributes(string identifier);
 
