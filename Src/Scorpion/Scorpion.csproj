@@ -9,7 +9,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Pug.Scorpion</RootNamespace>
-    <AssemblyName>Scorpion</AssemblyName>
+    <AssemblyName>Pug.Scorpion</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -32,32 +32,31 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Pug.Application.Data, Version=2.0.4587.31868, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Data.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Application.Data.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Application.Data.common">
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Data.common.dll</HintPath>
+    <Reference Include="Pug.Application.Data.common, Version=1.0.4587.31867, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Application.Data.common.dll</HintPath>
     </Reference>
     <Reference Include="Pug.Application.Security, Version=1.0.4587.31869, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Application.Security.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Application.Security.dll</HintPath>
     </Reference>
     <Reference Include="Pug.Bizcotty.Common">
-      <HintPath>..\..\..\Libraries\Bizcotty\Common\0.9\Debug\Pug.Bizcotty.Common.dll</HintPath>
+      <HintPath>..\..\Dependencies\Bizcotty\Debug\Pug.Bizcotty.Common.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Cartage, Version=1.0.0.21401, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Pug.Cartage, Version=1.0.0.41454, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Cartage.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Cartage.dll</HintPath>
     </Reference>
     <Reference Include="Pug.Core, Version=1.0.4621.17543, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Core.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Core.dll</HintPath>
     </Reference>
-    <Reference Include="Pug.Sisca, Version=1.0.1.21553, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Pug.Sisca, Version=1.0.1.40738, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Pug.Sisca.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Sisca.dll</HintPath>
     </Reference>
-    <Reference Include="Sisca.Common, Version=1.0.4789.21552, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="Pug.Sisca.Common, Version=1.0.4821.40737, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\Libraries\Sisca\1.0.1\Debug\Sisca.Common.dll</HintPath>
+      <HintPath>..\..\Dependencies\Sisca\Debug\Pug.Sisca.Common.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -72,8 +71,6 @@
     <Compile Include="CartFinalized.cs" />
     <Compile Include="ContactMethod.cs" />
     <Compile Include="Entity.cs" />
-    <Compile Include="RefImpl\ICartInfoStoreProvider.cs" />
-    <Compile Include="RefImpl\ICartIntoStoreProviderFactory.cs" />
     <Compile Include="IEntityAttribute.cs" />
     <Compile Include="IScorpionDataProvider.cs" />
     <Compile Include="IScorpionDataProviderFactory.cs" />
@@ -95,7 +92,7 @@
     <Compile Include="RefImpl\OrderFulfillmentProcess.cs" />
     <Compile Include="RefImpl\Payment.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SynchronizationContext.cs" />
+    <Compile Include="RefImpl\SynchronizationContext.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

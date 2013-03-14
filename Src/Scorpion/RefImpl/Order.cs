@@ -369,7 +369,7 @@ namespace Pug.Scorpion
 				if (string.IsNullOrEmpty(identifier))
 					identifier = GetNewPaymentIdentifier();
 				else
-					if (dataStore.OrderExists(identifier))
+					if (dataStore.PaymentExists(identifier))
 						throw new OrderExists();
 
 				dataStore.InsertPayment(identifier, info.Identifier, timestamp, method, transactionIdentifier, transactionType, status, statusShortMessage, statusLongMessage, paymentType, currency, amount, fee, finalAmount, taxAmount, exchangeRate, receiptIdentifier, SecurityManager.CurrentUser.Identity.Identifier);

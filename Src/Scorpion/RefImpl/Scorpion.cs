@@ -17,25 +17,27 @@ namespace Pug.Scorpion
 	{
 		ISecurityManager securityManager;
 
-		IApplicationData<ICartInfoStoreProvider> cartStoreProviderFactory;
-		Cartage.ICartage cartage;
-		Pp productInfoProvider;
+		//IApplicationData<ICartInfoStoreProvider> cartStoreProviderFactory;
+		//Cartage.ICartage cartage;
+		//Pp productInfoProvider;
 		Sisca.ISisca<Pi, Pp> sisca;
 
 		IScorpionDataProviderFactory dataProviderFactory;
 		
 		SynchronizationContext synchronizationContext = new SynchronizationContext();
 
-		public Scorpion(IApplicationData<ICartInfoStoreProvider> cartStoreProviderFactory, Pp productInfoProvider, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public Scorpion(Sisca.ISisca<Pi, Pp> sisca, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
 		{
 			this.securityManager = securityManager;
-			this.cartStoreProviderFactory = cartStoreProviderFactory;
+			//this.cartStoreProviderFactory = cartStoreProviderFactory;
 			this.dataProviderFactory = dataProviderFactory;
-			this.productInfoProvider = productInfoProvider;
+			//this.productInfoProvider = productInfoProvider;
 
-			cartage = new Cartage.Cartage<ICartInfoStoreProvider>(cartStoreProviderFactory, securityManager);
+			//cartage = new Cartage.Cartage<ICartInfoStoreProvider>(cartStoreProviderFactory, securityManager);
 
-			sisca = new Sisca.Sisca<ICartInfoStoreProvider, Pi, Pp>(cartage, productInfoProvider);
+			//sisca = new Sisca.Sisca<ICartInfoStoreProvider, Pi, Pp>(cartage, productInfoProvider);
+
+			this.sisca = sisca;
 		}
 
 		string GetNewIdentifier(object sync)
@@ -59,35 +61,35 @@ namespace Pug.Scorpion
 
 		#region ICartage<IShoppingCart<Pi,Pp>,ICartInfo,ICartLine<Pi>,ICartLineInfo<Pi>,ICartLineAttributeInfo,ICartSummary> Members
 
-		public bool CartExists(string identifier)
-		{
-			throw new System.NotImplementedException();
-		}
+		//public bool CartExists(string identifier)
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
-		public void DeleteCart(string identifier)
-		{
-			throw new System.NotImplementedException();
-		}
+		//public void DeleteCart(string identifier)
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
-		public Sisca.IShoppingCart<Pi, Pp> GetCart(string identifier)
-		{
-			throw new System.NotImplementedException();
-		}
+		//public Sisca.IShoppingCart<Pi, Pp> GetCart(string identifier)
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
-		public System.Collections.Generic.ICollection<Cartage.ICartInfo> GetCarts(Range<System.DateTime> creationPeriod, Range<System.DateTime> modificationPeriod)
-		{
-			throw new System.NotImplementedException();
-		}
+		//public System.Collections.Generic.ICollection<Cartage.ICartInfo> GetCarts(Range<System.DateTime> creationPeriod, Range<System.DateTime> modificationPeriod)
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
-		public Sisca.IShoppingCart<Pi, Pp> RegisterCart(string identifier)
-		{
-			throw new System.NotImplementedException();
-		}
+		//public Sisca.IShoppingCart<Pi, Pp> RegisterCart(string identifier)
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
-		public Sisca.IShoppingCart<Pi, Pp> RegisterCart()
-		{
-			throw new System.NotImplementedException();
-		}
+		//public Sisca.IShoppingCart<Pi, Pp> RegisterCart()
+		//{
+		//    throw new System.NotImplementedException();
+		//}
 
 		#endregion
 	
@@ -114,14 +116,16 @@ namespace Pug.Scorpion
 						if (dataStore.OrderExists(identifier))
 							throw new OrderExists();
 
-					ICartInfoStoreProvider cartInfoStore = cartStoreProviderFactory.GetSession();
+					//ICartInfoStoreProvider cartInfoStore = cartStoreProviderFactory.GetSession();
 
-					if (cartInfoStore.CartIsFinalized(cart))
+					Sisca.IShoppingCart<Pi, Pp> _cart = sisca.GetCart(cart);
+
+					if (_cart.Info.IsFinalized)
 					{
 						throw new CartFinalized();
 					}
 
-					cartInfoStore.FinalizeCart(cart);
+					_cart.MarkAsFinalized();
 
 					dataStore.InsertOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, securityManager.CurrentUser.Identity.Identifier);
 
@@ -130,6 +134,61 @@ namespace Pug.Scorpion
 
 					foreach (KeyValuePair<string, string> attribute in attributes)
 						dataStore.SetOrderAttribute(identifier, attribute.Key, attribute.Value, securityManager.CurrentUser.Identity.Identifier);
+
+					transactionScope.Complete();
+				}
+			}
+			catch
+			{
+				throw;
+			}
+		}
+
+		public void CreateOrder(ref string identifier, string cart, string buyerName, Address buyerAddress, PersonName buyerContactPerson, string payerName, Address billingAddress, PersonName billingContactPerson, decimal orderPriceTotal, decimal shippingCost, string buyerNote, string shippingName, Address shippingAddress, PersonName shippingContactPerson, ICollection<ContactMethod> contactMethods, IDictionary<string, string> attributes, ref string paymentIdentifier, DateTime paymentTimestamp, string paymentMethod, string paymentTransactionIdentifier, string paymentTransactionType, string paymentStatus, string paymentStatusShortMessage, string paymentStatusLongMessage, string paymentType, string paymentCurrency, decimal paymentAmount, decimal paymentFee, decimal paymentFinalAmount, decimal paymentTaxAmount, decimal paymentExchangeRate, string paymentReceiptIdentifier, IDictionary<string, string> paymentAttributes)
+		{
+			try
+			{
+				using (TransactionScope transactionScope = new TransactionScope(TransactionScopeOption.Required))
+				{
+					//RegisterOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, contactMethods, attributes);
+
+					IScorpionDataProvider dataStore = dataProviderFactory.GetSession();
+
+					if (string.IsNullOrEmpty(identifier))
+						identifier = GetNewOrderIdentifier();
+					else
+						if (dataStore.OrderExists(identifier))
+							throw new OrderExists();
+
+					//ICartInfoStoreProvider cartInfoStore = cartStoreProviderFactory.GetSession();
+
+					Sisca.IShoppingCart<Pi, Pp> _cart = sisca.GetCart(cart);
+
+					if (_cart.Info.IsFinalized)
+					{
+						throw new CartFinalized();
+					}
+
+					_cart.MarkAsFinalized();
+
+					dataStore.InsertOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, securityManager.CurrentUser.Identity.Identifier);
+
+					foreach (ContactMethod contactMethod in contactMethods)
+						dataStore.InsertContactMethod(identifier, contactMethod.Purpose, contactMethod.Name, contactMethod.Type, contactMethod.Destination, securityManager.CurrentUser.Identity.Identifier);
+
+					foreach (KeyValuePair<string, string> attribute in attributes)
+						dataStore.SetOrderAttribute(identifier, attribute.Key, attribute.Value, securityManager.CurrentUser.Identity.Identifier);
+
+					if (string.IsNullOrEmpty(identifier))
+						identifier = GetNewIdentifier(synchronizationContext.PaymentIdentifierSync);
+					else
+						if (dataStore.PaymentExists(identifier))
+							throw new OrderExists();
+
+					dataStore.InsertPayment(paymentIdentifier, identifier, paymentTimestamp, paymentMethod, paymentTransactionIdentifier, paymentTransactionType, paymentStatus, paymentStatusShortMessage, paymentStatusLongMessage, paymentType, paymentCurrency, paymentAmount, paymentFee, paymentFinalAmount, paymentTaxAmount, paymentExchangeRate, paymentReceiptIdentifier, securityManager.CurrentUser.Identity.Identifier);
+
+					foreach (KeyValuePair<string, string> attribute in attributes)
+						dataStore.SetPaymentAttribute(identifier, attribute.Key, attribute.Value, securityManager.CurrentUser.Identity.Identifier);
 
 					transactionScope.Complete();
 				}

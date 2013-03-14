@@ -11,11 +11,14 @@ using Pug.Sisca;
 
 namespace Pug.Scorpion
 {
-	interface IScorpion<Pi, Pp> : Sisca.ISisca<Pi, Pp>, IDisposable
+	public interface IScorpion<Pi, Pp> : IDisposable //Sisca.ISisca<Pi, Pp>, 
 		where Pi : IProductInfo
 		where Pp : IProductInfoProvider<Pi>
 	{
+	
 		void CreateOrder(ref string identifier, string cart, string buyerName, Address buyerAddress, PersonName buyerContactPerson, string payerName, Address billingAddress, PersonName billingContactPerson, decimal orderPriceTotal, decimal shippingCost, string buyerNote, string shippingName, Address shippingAddress, PersonName shippingContactPerson, ICollection<ContactMethod> contactMethods, IDictionary<string, string> attributes);
+
+		void CreateOrder(ref string identifier, string cart, string buyerName, Address buyerAddress, PersonName buyerContactPerson, string payerName, Address billingAddress, PersonName billingContactPerson, decimal orderPriceTotal, decimal shippingCost, string buyerNote, string shippingName, Address shippingAddress, PersonName shippingContactPerson, ICollection<ContactMethod> contactMethods, IDictionary<string, string> attributes, ref string paymentIdentifier, DateTime paymentTimestamp, string paymentMethod, string paymentTransactionIdentifier, string paymentTransactionType, string paymentStatus, string paymentStatusShortMessage, string paymentStatusLongMessage, string paymentPaymentType, string paymentCurrency, decimal paymentAmount, decimal paymentFee, decimal paymentFinalAmount, decimal paymentTaxAmount, decimal paymentExchangeRate, string paymentReceiptIdentifier, IDictionary<string, string> paymentAttributes);
 
 		IEnumerable<ICartInfo> GetOrders(string status, Range<DateTime> creationPeriod, string creationUser, Range<DateTime> lastModificationPeriod, string lastModificationUser);
 
