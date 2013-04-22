@@ -4,6 +4,8 @@ using System.Runtime.Serialization;
 
 using Pug.Application.Security;
 
+using Pug.Application.Data;
+
 namespace Pug.Scorpion
 {
 	[DataContract]
@@ -171,7 +173,7 @@ namespace Pug.Scorpion
 
 		object progressIdentifierSync = new object();
 
-		public OrderFulfillmentProcess(IFulfillmentProcessInfo info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public OrderFulfillmentProcess(IFulfillmentProcessInfo info, IApplicationData<IScorpionDataProvider> dataProviderFactory, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;

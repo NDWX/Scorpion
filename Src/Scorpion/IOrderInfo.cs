@@ -55,5 +55,9 @@ namespace Pug.Scorpion
 		decimal ShippingCost { get; }
 
 		string Status { get; }
+
+		DateTime LastFulfillmentProgress { get; }
+
+		string LastProgressingFulfillmentProcess { get; }
 	}
 }

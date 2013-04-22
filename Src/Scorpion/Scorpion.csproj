@@ -72,8 +72,7 @@
     <Compile Include="ContactMethod.cs" />
     <Compile Include="Entity.cs" />
     <Compile Include="IEntityAttribute.cs" />
-    <Compile Include="IScorpionDataProvider.cs" />
-    <Compile Include="IScorpionDataProviderFactory.cs" />
+    <Compile Include="RefImpl\IScorpionDataProvider.cs" />
     <Compile Include="OrderAttribute.cs" />
     <Compile Include="OrderExists.cs" />
     <Compile Include="OrderNotFound.cs" />

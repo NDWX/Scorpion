@@ -62,8 +62,10 @@ namespace Pug.Scorpion
 		void InsertFulfillmentProcess(string identifier, string asignee, string comment, DateTime timestamp, string status, DateTime expectedStatusCompletionTimestamp, DateTime expectedCompletionTimestamp, string user);
 
 		void SetFulfillmentProcessAttribute(string identifier, string name, string value, string user);
-		
+
 		IFulfillmentProcessInfo[] GetFulfillmentProcesses(Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp);
+
+		IFulfillmentProcessInfo[] GetFulfillmentProcesses(string order, Range<DateTime> lastFulfillmentProcessRegistrationPeriod, Range<DateTime> lastFulfillmentProgressPeriod, string currentFulfillmentProgresssStatus, string currentFulfillmentProgressAssignee, Range<DateTime> expectedFulfillmentProcessCompletionTimestamp);
 
 		IFulfillmentProcessInfo GetFulfillmentProcess(string identifier);
 

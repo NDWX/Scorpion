@@ -4,6 +4,8 @@ using System.Runtime.Serialization;
 
 using Pug.Application.Security;
 
+using Pug.Application.Data;
+
 namespace Pug.Scorpion
 {
 	[DataContract]
@@ -167,7 +169,7 @@ namespace Pug.Scorpion
 		}
 		IPaymentInfo info;
 
-		public Payment(IPaymentInfo info, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public Payment(IPaymentInfo info, IApplicationData<IScorpionDataProvider> dataProviderFactory, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;

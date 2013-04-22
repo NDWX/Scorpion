@@ -7,6 +7,8 @@ using System.Transactions;
 
 using Pug.Application.Security;
 
+using Pug.Application.Data;
+
 using Pug.Bizcotty;
 using Pug.Bizcotty.Geography;
 
@@ -232,7 +234,7 @@ namespace Pug.Scorpion
 
 		SynchronizationContext synchronizationContext;
 
-		public Order(IOrderInfo info, IScorpionDataProviderFactory dataProviderFactory, SynchronizationContext synchronizationContext, ISecurityManager securityManager)
+		public Order(IOrderInfo info, IApplicationData<IScorpionDataProvider> dataProviderFactory, SynchronizationContext synchronizationContext, ISecurityManager securityManager)
 			: base(dataProviderFactory, securityManager)
 		{
 			this.info = info;
@@ -484,6 +486,8 @@ namespace Pug.Scorpion
 					//RegisterOrder(identifier, cart, buyerName, buyerAddress, buyerContactPerson, payerName, billingAddress, billingContactPerson, orderPriceTotal, shippingCost, buyerNote, shippingName, shippingAddress, shippingContactPerson, contactMethods, attributes);
 
 					dataStore = DataProviderFactory.GetSession();
+					
+					IEnumerable<IFulfillmentProcessInfo> fulfillmentProcesses = dataStore.GetFulfillmentProcesses(info.Identifier, null, null, string.Empty, string.Empty, null);
 
 					if (string.IsNullOrEmpty(identifier))
 						identifier = GetNewFulfillmentProcessIdentifier();
@@ -518,7 +522,7 @@ namespace Pug.Scorpion
 			{
 				dataSession = DataProviderFactory.GetSession();
 
-				return dataSession.GetFulfillmentProcesses(lastFulfillmentProcessRegistrationPeriod, lastFulfillmentProgressPeriod, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
+				return dataSession.GetFulfillmentProcesses(info.Identifier, lastFulfillmentProcessRegistrationPeriod, lastFulfillmentProgressPeriod, currentFulfillmentProgresssStatus, currentFulfillmentProgressAssignee, expectedFulfillmentProcessCompletionTimestamp);
 			}
 			catch
 			{

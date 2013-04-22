@@ -11,5 +11,7 @@ namespace Pug.Scorpion
 		string RegistrationUser { get; }
 		DateTime StartTimestamp { get; }
 		string Status { get; }
+		DateTime LastProgressTimestamp { get; }
+		string LastProgress { get; }
 	}
 }

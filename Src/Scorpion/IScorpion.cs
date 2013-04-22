@@ -34,4 +34,8 @@ namespace Pug.Scorpion
 
 		IFulfillmentProcess GetFulfillmentProcess(string identifier);
 	}
+
+	public interface IScorpion : IScorpion<IProductInfo, IProductInfoProvider<IProductInfo>>
+	{
+	}
 }

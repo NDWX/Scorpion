@@ -22,11 +22,11 @@ namespace Pug.Scorpion
 		//Pp productInfoProvider;
 		Sisca.ISisca<Pi, Pp> sisca;
 
-		IScorpionDataProviderFactory dataProviderFactory;
+		IApplicationData<IScorpionDataProvider> dataProviderFactory;
 		
 		SynchronizationContext synchronizationContext = new SynchronizationContext();
 
-		public Scorpion(Sisca.ISisca<Pi, Pp> sisca, IScorpionDataProviderFactory dataProviderFactory, ISecurityManager securityManager)
+		public Scorpion(Sisca.ISisca<Pi, Pp> sisca, IApplicationData<IScorpionDataProvider> dataProviderFactory, ISecurityManager securityManager)
 		{
 			this.securityManager = securityManager;
 			//this.cartStoreProviderFactory = cartStoreProviderFactory;
@@ -325,5 +325,13 @@ namespace Pug.Scorpion
 		}
 
 		#endregion
+	}
+
+	public class Scorpion : Scorpion<Sisca.IProductInfo, Sisca.IProductInfoProvider<Sisca.IProductInfo>>
+	{
+		public Scorpion(Sisca.ISisca sisca, IApplicationData<IScorpionDataProvider> dataProviderFactory, ISecurityManager securityManager)
+			: base(sisca, dataProviderFactory, securityManager)
+		{
+		}
 	}
 }
